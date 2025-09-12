@@ -1,28 +1,45 @@
-// src/index.js
-
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./db');
+
+// Импортируем все маршруты
+const authRoutes = require('./routes/authRoutes');
+const projectRoutes = require('./routes/projectRoutes');
+const taskRoutes = require('./routes/taskRoutes');
 
 const app = express();
 
 // Подключение к базе данных
 connectDB();
 
-// Middleware
+// Middleware для обработки JSON и CORS
 app.use(cors());
-app.use(express.json({ extended: true }));
+app.use(express.json());
 
-// --- СБОРКА МАРШРУТОВ ---
-// Все маршруты, связанные с аутентификацией, будут начинаться с /api/auth
-app.use('/api/auth', require('./routes/authRoutes'));
+// --- Диагностика и подключение маршрутов ---
+// Проверяем каждый роутер перед использованием
+if (authRoutes && typeof authRoutes === 'function') {
+  app.use('/api/auth', authRoutes);
+  console.log('✅ Маршруты аутентификации (authRoutes) успешно подключены.');
+} else {
+  console.error('❌ ОШИБКА: authRoutes не является функцией! Проверьте экспорт в файле routes/authRoutes.js');
+}
 
-// Все маршруты, связанные с проектами (и задачами ВНУТРИ проектов), будут начинаться с /api/projects
-app.use('/api/projects', require('./routes/projectRoutes'));
+if (projectRoutes && typeof projectRoutes === 'function') {
+  app.use('/api/projects', projectRoutes);
+  console.log('✅ Маршруты проектов (projectRoutes) успешно подключены.');
+} else {
+  console.error('❌ ОШИБКА: projectRoutes не является функцией! Проверьте экспорт в файле routes/projectRoutes.js');
+}
 
-// Все маршруты для работы с КОНКРЕТНОЙ задачей по её ID будут начинаться с /api/tasks
-app.use('/api/tasks', require('./routes/taskRoutes'));
+if (taskRoutes && typeof taskRoutes === 'function') {
+  app.use('/api/tasks', taskRoutes);
+  console.log('✅ Маршруты задач (taskRoutes) успешно подключены.');
+} else {
+  console.error('❌ ОШИБКА: taskRoutes не является функцией! Проверьте экспорт в файле routes/taskRoutes.js');
+}
+
 
 const PORT = process.env.PORT || 5000;
 

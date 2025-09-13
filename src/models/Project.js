@@ -3,8 +3,19 @@ const { Schema, model, Types } = require('mongoose');
 const projectSchema = new Schema({
     name: { type: String, required: true },
     owner: { type: Types.ObjectId, ref: 'User', required: true, index: true },
-    members: [{ type: Types.ObjectId, ref: 'User', index: true }],
-    
+   members: [
+  {
+    user: {
+      type: Types.ObjectId,
+      ref: 'User'
+    },
+    role: {
+      type: String,
+      enum: ['admin', 'member'],
+      default: 'member'
+    }
+  }
+],
     // НОВЫЕ ПОЛЯ: Настройки доски для каждого проекта
     statuses: {
         type: [{

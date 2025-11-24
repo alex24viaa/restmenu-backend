@@ -2,6 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./db');
+const config = require('./config');
+
+// Устанавливаем JWT_SECRET из config, если он не задан в переменных окружения
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = config.JWT_SECRET;
+}
 
 // Импортируем все маршруты
 const authRoutes = require('./routes/authRoutes');
@@ -41,6 +47,6 @@ if (taskRoutes && typeof taskRoutes === 'function') {
 }
 
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => console.log(`Сервер запущен на порту ${PORT}`));

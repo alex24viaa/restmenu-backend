@@ -15,7 +15,15 @@ exports.register = async (req, res) => {
    }
    const user = new User({ login, password });
    await user.save();
-   return res.status(201).json({ message: 'Пользователь успешно зарегистрирован' });
+   
+   // Генерируем токен после успешной регистрации
+   const token = jwt.sign(
+     { userId: user._id.toString() },
+     process.env.JWT_SECRET,
+     { expiresIn: '24h' }
+   );
+   
+   return res.status(201).json({ token, userId: user._id.toString() });
  } catch (error) {
    console.error('Ошибка при регистрации:', error.message);
    res.status(500).json({ message: 'Что-то пошло не так, попробуйте снова' });
@@ -36,7 +44,7 @@ exports.login = async (req, res) => {
    // Если у пользователя нет пароля (он был создан по приглашению)
    if (!user.password) {
        // Выдаем специальный временный токен для установки пароля
-       const tempToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+       const tempToken = jwt.sign({ userId: user._id.toString() }, process.env.JWT_SECRET, { expiresIn: '15m' });
        return res.status(401).json({
            message: 'Требуется установка пароля',
            setPasswordRequired: true,
@@ -51,12 +59,12 @@ exports.login = async (req, res) => {
    }
 
    const token = jwt.sign(
-     { userId: user.id },
+     { userId: user._id.toString() },
      process.env.JWT_SECRET, // Убедитесь, что JWT_SECRET доступен
      { expiresIn: '24h' }
    );
 
-   res.json({ token, userId: user.id });
+   res.json({ token, userId: user._id.toString() });
 
  } catch (error) {
    console.error('Ошибка при входе:', error.message);
@@ -84,8 +92,8 @@ exports.setPassword = async (req, res) => {
         await user.save(); // Хук в модели User.js автоматически захэширует пароль
         
         // Сразу же логиним пользователя, выдав ему постоянный токен
-        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '24h' });
-        res.status(200).json({ message: 'Пароль успешно установлен', token, userId: user.id });
+        const token = jwt.sign({ userId: user._id.toString() }, process.env.JWT_SECRET, { expiresIn: '24h' });
+        res.status(200).json({ message: 'Пароль успешно установлен', token, userId: user._id.toString() });
 
     } catch(e) {
         console.error('Ошибка при установке пароля:', e.message);

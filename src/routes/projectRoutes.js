@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const projectController = require('../controllers/projectController');
+const taskController = require('../controllers/taskController');
 const authMiddleware = require('../middleware/authMiddleware');
 const isAdminMiddleware = require('../middleware/isAdminMiddleware'); // <-- ДОБАВИЛИ ИМПОРТ
 
@@ -21,6 +22,15 @@ router.patch('/:projectId', authMiddleware, isAdminMiddleware, projectController
 // Получить всех участников проекта (пока доступно всем участникам)
 router.get('/:projectId/members', authMiddleware, projectController.getProjectMembers);
 
+// --- МАРШРУТЫ ДЛЯ ЗАДАЧ ---
+// Создать задачу в проекте
+router.post('/:projectId/tasks', authMiddleware, taskController.createTask);
+
+// Получить все задачи проекта
+router.get('/:projectId/tasks', authMiddleware, taskController.getTasks);
+
+// Пригласить участника в проект
+router.post('/:projectId/invite', authMiddleware, isAdminMiddleware, projectController.inviteMember);
 
 // В следующих шагах мы добавим сюда маршруты для управления участниками
 // router.delete('/:projectId/members/:memberId', authMiddleware, isAdminMiddleware, ...);
